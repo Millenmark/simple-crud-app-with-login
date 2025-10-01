@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { decrypt } from "@/utils/auth";
+import { decrypt } from "@/lib/auth";
 
 const protectedRoutes = ["/"];
 const publicRoutes = ["/login"];

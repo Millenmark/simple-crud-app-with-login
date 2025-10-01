@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { createSession, deleteSession } from "@/utils/auth";
+import { createSession, deleteSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 const testUser = {
