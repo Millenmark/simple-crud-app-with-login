@@ -6,10 +6,27 @@ import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import type { Record } from "@/components/data-table";
 
-import data from "./data.json";
-const records = data as unknown as Record[];
+async function getRecords(): Promise<Record[]> {
+  try {
+    const res = await fetch(
+      `${
+        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+      }/api/record`,
+      {
+        cache: "no-store",
+      }
+    );
+    if (!res.ok) throw new Error("Failed to fetch records");
+    return res.json();
+  } catch (error) {
+    console.error("Error fetching records:", error);
+    return [];
+  }
+}
 
-export default function Page() {
+export default async function Page() {
+  const records = await getRecords();
+
   return (
     <SidebarProvider
       style={
