@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { login } from "./actions";
 
-export function LoginForm() {
+export default function LoginForm() {
   const [state, loginAction, isPending] = useActionState(login, undefined);
 
   return (
