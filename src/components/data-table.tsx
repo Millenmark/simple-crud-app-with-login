@@ -35,6 +35,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import RecordForm from "@/components/record-form";
 
 export type Record = {
   id: string;
@@ -135,9 +143,19 @@ export function DataTable({ data }: { data: Record[] }) {
   return (
     <div className="w-full">
       <div className="flex items-center py-4">
-        <Button className="ml-auto cursor-pointer">
-          <Plus /> Add Record
-        </Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button className="ml-auto cursor-pointer">
+              <Plus /> Add Record
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Record</DialogTitle>
+            </DialogHeader>
+            <RecordForm />
+          </DialogContent>
+        </Dialog>
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
