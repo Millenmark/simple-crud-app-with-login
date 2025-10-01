@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 
 const testUser = {
   id: "1",
-  email: "contact@example.com",
+  email: "m@example.com",
   password: "12345678",
 };
 
