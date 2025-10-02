@@ -48,7 +48,7 @@ export default function Page() {
                       id="email"
                       name="email"
                       type="email"
-                      value="m@example.com"
+                      defaultValue="m@example.com"
                       required
                     />
                     {state?.errors?.email && (
@@ -65,7 +65,7 @@ export default function Page() {
                       id="password"
                       name="password"
                       type="password"
-                      value="12345678"
+                      defaultValue="12345678"
                       required
                     />
                     {state?.errors?.password && (
