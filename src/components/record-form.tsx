@@ -14,9 +14,10 @@ import {
 import { getData } from "country-list";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
-export default function RecordForm() {
+export default function RecordForm({ onSuccess }: { onSuccess?: () => void }) {
   const [country, setCountry] = useState("");
   const [accountType, setAccountType] = useState("");
   const [username, setUsername] = useState("");
@@ -69,14 +70,15 @@ export default function RecordForm() {
         setContactNumber("");
         setPhoto(null);
         setPreviewUrl(null);
+        if (onSuccess) onSuccess();
+        toast.success("Record submitted successfully!");
       } else {
-        alert("Submission failed: " + (data.error || "Unknown error"));
+        toast.error("Submission failed: " + (data.error || "Unknown error"));
       }
     } catch (error) {
-      alert("Error submitting form");
+      toast.error("Error submitting form");
     } finally {
       setIsSubmitting(false);
-      alert("Record submitted successfully!");
     }
   };
 

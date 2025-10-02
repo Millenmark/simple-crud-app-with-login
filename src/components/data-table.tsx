@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useState } from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -67,11 +68,8 @@ export const columns: ColumnDef<Record>[] = [
   {
     accessorKey: "firstName",
     header: "Name",
-    cell: ({ row, getValue }) => {
-      const firstName = getValue<string>();
-      const lastName = row.original.lastName;
-      return firstName + " " + lastName;
-    },
+    cell: ({ row, getValue }) =>
+      getValue<string>() + " " + row.original.lastName,
   },
   {
     accessorKey: "username",
@@ -128,6 +126,7 @@ export function DataTable({ data }: { data: Record[] }) {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+  const [open, setOpen] = React.useState(false);
 
   const table = useReactTable({
     data,
@@ -151,7 +150,7 @@ export function DataTable({ data }: { data: Record[] }) {
   return (
     <div className="w-full">
       <div className="flex items-center py-4">
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button className="ml-auto cursor-pointer">
               <Plus /> Add Record
@@ -161,7 +160,7 @@ export function DataTable({ data }: { data: Record[] }) {
             <DialogHeader>
               <DialogTitle>Add New Record</DialogTitle>
             </DialogHeader>
-            <RecordForm />
+            <RecordForm onSuccess={() => setOpen(false)} />
           </DialogContent>
         </Dialog>
       </div>
