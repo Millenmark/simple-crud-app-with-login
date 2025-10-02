@@ -34,7 +34,7 @@ Before running this application, ensure you have the following installed:
    Or create `.env.local` with the following variables:
 
    ```
-   SESSION_SECRET=your-secret-key-here
+   SESSION_SECRET=some-secure-key
    MONGODB_URI=mongodb://localhost:27017/simple-crud-app
    ```
 
