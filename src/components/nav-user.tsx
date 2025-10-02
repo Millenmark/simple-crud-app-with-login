@@ -1,5 +1,6 @@
 "use client";
 
+import { useTransition } from "react";
 import {
   IconDotsVertical,
   IconLogout,
@@ -24,6 +25,13 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 import { logout } from "@/app/login/actions";
 
@@ -37,6 +45,7 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
+  const [isPending, startTransition] = useTransition();
 
   return (
     <SidebarMenu>
@@ -88,15 +97,26 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer">
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => startTransition(async () => await logout())}
+            >
               <IconLogout />
-              <form action={logout}>
-                <button type="submit">Logout</button>
-              </form>
+              Logout
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
+      <AlertDialog open={isPending}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Logging out...</AlertDialogTitle>
+            <AlertDialogDescription>
+              Please wait while we log you out.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+        </AlertDialogContent>
+      </AlertDialog>
     </SidebarMenu>
   );
 }
