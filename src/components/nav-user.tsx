@@ -90,7 +90,9 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuItem className="cursor-pointer">
               <IconLogout />
-              <button onClick={() => logout()}>Logout</button>
+              <form action={logout}>
+                <button type="submit">Logout</button>
+              </form>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
