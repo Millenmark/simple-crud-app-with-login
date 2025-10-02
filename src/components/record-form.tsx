@@ -16,7 +16,19 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Record } from "./data-table";
+import { Record as RecordType } from "./data-table";
+import { z } from "zod";
+
+const formSchema = z.object({
+  country: z.string().min(1, "Country is required"),
+  accountType: z.string().min(1, "Account type is required"),
+  username: z.string().min(1, "Username is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  firstName: z.string().min(1, "First name is required"),
+  email: z.string().email("Invalid email address"),
+  contactNumber: z.string().min(1, "Contact number is required"),
+  photo: z.instanceof(File).optional().nullable(),
+});
 
 interface FormData {
   country: string;
@@ -34,7 +46,7 @@ export default function RecordForm({
   record,
 }: {
   onSuccess?: () => void;
-  record?: Record;
+  record?: RecordType;
 }) {
   const [formData, setFormData] = useState<FormData>({
     country: record?.country || "",
@@ -50,6 +62,7 @@ export default function RecordForm({
     record?.photoUrl || null
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     return () => {
@@ -61,6 +74,20 @@ export default function RecordForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const validation = formSchema.safeParse(formData);
+    if (!validation.success) {
+      const fieldErrors: Record<string, string> = {};
+      validation.error.issues.forEach((issue) => {
+        if (issue.path.length > 0) {
+          fieldErrors[issue.path[0] as string] = issue.message;
+        }
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
+    setErrors({});
     setIsSubmitting(true);
 
     const submitData = new FormData();
@@ -147,6 +174,9 @@ export default function RecordForm({
               </SelectGroup>
             </SelectContent>
           </Select>
+          {errors.country && (
+            <p className="text-red-500 text-sm">{errors.country}</p>
+          )}
         </div>
         <div>
           <label
@@ -173,6 +203,9 @@ export default function RecordForm({
               </SelectGroup>
             </SelectContent>
           </Select>
+          {errors.accountType && (
+            <p className="text-red-500 text-sm">{errors.accountType}</p>
+          )}
         </div>
         <div className="grid w-full items-center gap-3">
           <Label htmlFor="username">Username</Label>
@@ -183,8 +216,10 @@ export default function RecordForm({
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, username: e.target.value }))
             }
-            required
           />
+          {errors.username && (
+            <p className="text-red-500 text-sm">{errors.username}</p>
+          )}
         </div>
         <div className="grid w-full items-center gap-3">
           <Label htmlFor="firstName">First Name</Label>
@@ -195,8 +230,10 @@ export default function RecordForm({
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, firstName: e.target.value }))
             }
-            required
           />
+          {errors.firstName && (
+            <p className="text-red-500 text-sm">{errors.firstName}</p>
+          )}
         </div>
         <div className="grid w-full items-center gap-3">
           <Label htmlFor="lastName">Last Name</Label>
@@ -207,8 +244,10 @@ export default function RecordForm({
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, lastName: e.target.value }))
             }
-            required
           />
+          {errors.lastName && (
+            <p className="text-red-500 text-sm">{errors.lastName}</p>
+          )}
         </div>
         <div className="grid w-full items-center gap-3">
           <Label htmlFor="email">Email Address</Label>
@@ -219,13 +258,14 @@ export default function RecordForm({
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, email: e.target.value }))
             }
-            required
           />
+          {errors.email && (
+            <p className="text-red-500 text-sm">{errors.email}</p>
+          )}
         </div>
         <div className="grid w-full items-center gap-3">
           <Label htmlFor="contactNumber">Contact Number</Label>
           <Input
-            required
             type="tel"
             id="contactNumber"
             value={formData.contactNumber}
@@ -236,6 +276,9 @@ export default function RecordForm({
               }))
             }
           />
+          {errors.contactNumber && (
+            <p className="text-red-500 text-sm">{errors.contactNumber}</p>
+          )}
         </div>
         <div className="grid w-full items-center gap-3">
           <Label htmlFor="photo">Photo (optional)</Label>
