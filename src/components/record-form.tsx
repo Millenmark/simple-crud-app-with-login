@@ -17,15 +17,28 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
+interface FormData {
+  country: string;
+  accountType: string;
+  username: string;
+  lastName: string;
+  firstName: string;
+  email: string;
+  contactNumber: string;
+  photo: File | null;
+}
+
 export default function RecordForm({ onSuccess }: { onSuccess?: () => void }) {
-  const [country, setCountry] = useState("");
-  const [accountType, setAccountType] = useState("");
-  const [username, setUsername] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [email, setEmail] = useState("");
-  const [contactNumber, setContactNumber] = useState("");
-  const [photo, setPhoto] = useState<File | null>(null);
+  const [formData, setFormData] = useState<FormData>({
+    country: "",
+    accountType: "",
+    username: "",
+    lastName: "",
+    firstName: "",
+    email: "",
+    contactNumber: "",
+    photo: null,
+  });
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -41,34 +54,36 @@ export default function RecordForm({ onSuccess }: { onSuccess?: () => void }) {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const formData = new FormData();
-    formData.append("country", country);
-    formData.append("accountType", accountType);
-    formData.append("username", username);
-    formData.append("lastName", lastName);
-    formData.append("firstName", firstName);
-    formData.append("email", email);
-    formData.append("contactNumber", contactNumber);
-    if (photo) {
-      formData.append("photo", photo);
+    const submitData = new FormData();
+    submitData.append("country", formData.country);
+    submitData.append("accountType", formData.accountType);
+    submitData.append("username", formData.username);
+    submitData.append("lastName", formData.lastName);
+    submitData.append("firstName", formData.firstName);
+    submitData.append("email", formData.email);
+    submitData.append("contactNumber", formData.contactNumber);
+    if (formData.photo) {
+      submitData.append("photo", formData.photo);
     }
 
     try {
       const res = await fetch("/api/record", {
         method: "POST",
-        body: formData,
+        body: submitData,
       });
 
       const data = await res.json();
       if (data.success) {
-        setCountry("");
-        setAccountType("");
-        setUsername("");
-        setLastName("");
-        setFirstName("");
-        setEmail("");
-        setContactNumber("");
-        setPhoto(null);
+        setFormData({
+          country: "",
+          accountType: "",
+          username: "",
+          lastName: "",
+          firstName: "",
+          email: "",
+          contactNumber: "",
+          photo: null,
+        });
         setPreviewUrl(null);
         if (onSuccess) onSuccess();
         toast.success("Record submitted successfully!");
@@ -92,7 +107,12 @@ export default function RecordForm({ onSuccess }: { onSuccess?: () => void }) {
           >
             Country
           </label>
-          <Select value={country} onValueChange={setCountry}>
+          <Select
+            value={formData.country}
+            onValueChange={(value) =>
+              setFormData((prev) => ({ ...prev, country: value }))
+            }
+          >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select a country" />
             </SelectTrigger>
@@ -115,7 +135,12 @@ export default function RecordForm({ onSuccess }: { onSuccess?: () => void }) {
           >
             Account Type
           </label>
-          <Select value={accountType} onValueChange={setAccountType}>
+          <Select
+            value={formData.accountType}
+            onValueChange={(value) =>
+              setFormData((prev) => ({ ...prev, accountType: value }))
+            }
+          >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select a account type" />
             </SelectTrigger>
@@ -134,8 +159,10 @@ export default function RecordForm({ onSuccess }: { onSuccess?: () => void }) {
           <Input
             type="text"
             id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={formData.username}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, username: e.target.value }))
+            }
             required
           />
         </div>
@@ -144,8 +171,10 @@ export default function RecordForm({ onSuccess }: { onSuccess?: () => void }) {
           <Input
             type="text"
             id="firstName"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
+            value={formData.firstName}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, firstName: e.target.value }))
+            }
             required
           />
         </div>
@@ -154,8 +183,10 @@ export default function RecordForm({ onSuccess }: { onSuccess?: () => void }) {
           <Input
             type="text"
             id="lastName"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
+            value={formData.lastName}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, lastName: e.target.value }))
+            }
             required
           />
         </div>
@@ -164,8 +195,10 @@ export default function RecordForm({ onSuccess }: { onSuccess?: () => void }) {
           <Input
             type="email"
             id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={formData.email}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, email: e.target.value }))
+            }
             required
           />
         </div>
@@ -175,8 +208,13 @@ export default function RecordForm({ onSuccess }: { onSuccess?: () => void }) {
             required
             type="tel"
             id="contactNumber"
-            value={contactNumber}
-            onChange={(e) => setContactNumber(e.target.value)}
+            value={formData.contactNumber}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                contactNumber: e.target.value,
+              }))
+            }
           />
         </div>
         <div className="grid w-full items-center gap-3">
@@ -187,7 +225,7 @@ export default function RecordForm({ onSuccess }: { onSuccess?: () => void }) {
             accept="image/*"
             onChange={(e) => {
               const file = e.target.files?.[0] || null;
-              setPhoto(file);
+              setFormData((prev) => ({ ...prev, photo: file }));
               if (file) {
                 setPreviewUrl(URL.createObjectURL(file));
               } else {

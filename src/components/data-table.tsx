@@ -118,7 +118,13 @@ export const columns: ColumnDef<Record>[] = [
   },
 ];
 
-export function DataTable({ data }: { data: Record[] }) {
+export function DataTable({
+  data,
+  onRefetch,
+}: {
+  data: Record[];
+  onRefetch: () => void;
+}) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -160,7 +166,12 @@ export function DataTable({ data }: { data: Record[] }) {
             <DialogHeader>
               <DialogTitle>Add New Record</DialogTitle>
             </DialogHeader>
-            <RecordForm onSuccess={() => setOpen(false)} />
+            <RecordForm
+              onSuccess={() => {
+                onRefetch();
+                setOpen(false);
+              }}
+            />
           </DialogContent>
         </Dialog>
       </div>
