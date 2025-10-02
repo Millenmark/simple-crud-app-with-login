@@ -63,7 +63,21 @@ export async function DELETE(
     await dbConnect();
     const { id } = await params;
 
+    const record = await Record.findById(id);
+    if (!record) {
+      return NextResponse.json({ error: "Record not found" }, { status: 404 });
+    }
+
+    const photoUrl = record.photoUrl;
+
     await Record.findByIdAndDelete(id);
+
+    if (photoUrl) {
+      const filePath = path.join(process.cwd(), "public", photoUrl.slice(1));
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
