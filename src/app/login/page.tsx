@@ -11,11 +11,22 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { login } from "./actions";
+import { toast } from "sonner";
+import { redirect } from "next/navigation";
 
 export default function Page() {
   const [state, loginAction, isPending] = useActionState(login, undefined);
+
+  useEffect(() => {
+    if (state?.success) {
+      toast.success("Login successful!");
+      redirect("/");
+    } else if (state?.errors) {
+      toast.error("Login failed. Please check your credentials.");
+    }
+  }, [state]);
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
@@ -37,9 +48,14 @@ export default function Page() {
                       id="email"
                       name="email"
                       type="email"
-                      placeholder="m@example.com"
+                      value="m@example.com"
                       required
                     />
+                    {state?.errors?.email && (
+                      <p className="text-sm text-red-500">
+                        {state.errors.email.join(", ")}
+                      </p>
+                    )}
                   </div>
                   <div className="grid gap-3">
                     <div className="flex items-center">
@@ -49,8 +65,14 @@ export default function Page() {
                       id="password"
                       name="password"
                       type="password"
+                      value="12345678"
                       required
                     />
+                    {state?.errors?.password && (
+                      <p className="text-sm text-red-500">
+                        {state.errors.password.join(", ")}
+                      </p>
+                    )}
                   </div>
                   <div className="flex flex-col gap-3">
                     <Button

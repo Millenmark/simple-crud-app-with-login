@@ -6,7 +6,6 @@ import { DataTable } from "@/components/data-table";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import type { Record } from "@/components/data-table";
-import { Toaster } from "@/components/ui/sonner";
 import { getRecords } from "@/lib/records";
 
 export default function Page() {
@@ -43,7 +42,6 @@ export default function Page() {
           </div>
         </SidebarInset>
       </SidebarProvider>
-      <Toaster position="top-center" />
     </>
   );
 }
