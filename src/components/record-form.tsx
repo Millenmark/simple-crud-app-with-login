@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Select,
   SelectContent,
@@ -25,8 +25,16 @@ export default function RecordForm() {
   const [email, setEmail] = useState("");
   const [contactNumber, setContactNumber] = useState("");
   const [photo, setPhoto] = useState<File | null>(null);
-  const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,11 +60,6 @@ export default function RecordForm() {
 
       const data = await res.json();
       if (data.success) {
-        if (data.photoUrl) {
-          setUploadedUrl(data.photoUrl);
-        }
-
-        // Reset form
         setCountry("");
         setAccountType("");
         setUsername("");
@@ -65,6 +68,7 @@ export default function RecordForm() {
         setEmail("");
         setContactNumber("");
         setPhoto(null);
+        setPreviewUrl(null);
       } else {
         alert("Submission failed: " + (data.error || "Unknown error"));
       }
@@ -179,7 +183,15 @@ export default function RecordForm() {
             id="photo"
             type="file"
             accept="image/*"
-            onChange={(e) => setPhoto(e.target.files?.[0] || null)}
+            onChange={(e) => {
+              const file = e.target.files?.[0] || null;
+              setPhoto(file);
+              if (file) {
+                setPreviewUrl(URL.createObjectURL(file));
+              } else {
+                setPreviewUrl(null);
+              }
+            }}
           />
         </div>
         <Button
@@ -191,11 +203,10 @@ export default function RecordForm() {
         </Button>
       </form>
 
-      {uploadedUrl && (
+      {previewUrl && (
         <div className="mt-6">
-          <p className="text-sm text-gray-600">Uploaded Photo:</p>
           <img
-            src={uploadedUrl}
+            src={previewUrl as string}
             alt="Profile"
             className="mt-2 w-32 h-32 object-cover rounded-md"
           />
