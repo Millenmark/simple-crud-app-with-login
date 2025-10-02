@@ -44,10 +44,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import RecordForm from "@/components/record-form";
+import { toast } from "sonner";
 
 export type Record = {
-  id: string;
-  photo: string;
+  _id: string;
+  photoUrl: string;
   country: string;
   contactNumber: number;
   firstName: string;
@@ -57,7 +58,10 @@ export type Record = {
   accountType: string;
 };
 
-export const columns: ColumnDef<Record>[] = [
+const getColumns = (
+  handleEdit: (record: Record) => void,
+  handleDelete: (id: string) => void
+): ColumnDef<Record>[] => [
   {
     accessorKey: "photoUrl",
     header: "Photo",
@@ -103,14 +107,12 @@ export const columns: ColumnDef<Record>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(record.id)}
-            >
-              Copy payment ID
+            <DropdownMenuItem onClick={() => handleEdit(record)}>
+              Edit
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-            <DropdownMenuItem>View payment details</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleDelete(record._id)}>
+              Delete
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );
@@ -133,6 +135,35 @@ export function DataTable({
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
   const [open, setOpen] = React.useState(false);
+  const [editingRecord, setEditingRecord] = React.useState<Record | undefined>(
+    undefined
+  );
+
+  const handleDelete = async (id: string) => {
+    if (confirm("Are you sure you want to delete this record?")) {
+      try {
+        const res = await fetch(`/api/record/${id}`, {
+          method: "DELETE",
+        });
+        const data = await res.json();
+        if (data.success) {
+          onRefetch();
+          toast.success("Record deleted successfully");
+        } else {
+          toast.error("Failed to delete record");
+        }
+      } catch (error) {
+        toast.error("Error deleting record");
+      }
+    }
+  };
+
+  const handleEdit = (record: Record) => {
+    setEditingRecord(record);
+    setOpen(true);
+  };
+
+  const columns = getColumns(handleEdit, handleDelete);
 
   const table = useReactTable({
     data,
@@ -156,7 +187,13 @@ export function DataTable({
   return (
     <div className="w-full">
       <div className="flex items-center py-4">
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog
+          open={open}
+          onOpenChange={(open) => {
+            setOpen(open);
+            if (!open) setEditingRecord(undefined);
+          }}
+        >
           <DialogTrigger asChild>
             <Button className="ml-auto cursor-pointer">
               <Plus /> Add Record
@@ -164,12 +201,16 @@ export function DataTable({
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add New Record</DialogTitle>
+              <DialogTitle>
+                {editingRecord ? "Edit Record" : "Add New Record"}
+              </DialogTitle>
             </DialogHeader>
             <RecordForm
+              record={editingRecord}
               onSuccess={() => {
                 onRefetch();
                 setOpen(false);
+                setEditingRecord(undefined);
               }}
             />
           </DialogContent>

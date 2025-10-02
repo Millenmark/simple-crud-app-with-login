@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { Record } from "./data-table";
 
 interface FormData {
   country: string;
@@ -28,18 +29,26 @@ interface FormData {
   photo: File | null;
 }
 
-export default function RecordForm({ onSuccess }: { onSuccess?: () => void }) {
+export default function RecordForm({
+  onSuccess,
+  record,
+}: {
+  onSuccess?: () => void;
+  record?: Record;
+}) {
   const [formData, setFormData] = useState<FormData>({
-    country: "",
-    accountType: "",
-    username: "",
-    lastName: "",
-    firstName: "",
-    email: "",
-    contactNumber: "",
+    country: record?.country || "",
+    accountType: record?.accountType || "",
+    username: record?.username || "",
+    lastName: record?.lastName || "",
+    firstName: record?.firstName || "",
+    email: record?.email || "",
+    contactNumber: record?.contactNumber?.toString() || "",
     photo: null,
   });
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(
+    record?.photoUrl || null
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -62,31 +71,42 @@ export default function RecordForm({ onSuccess }: { onSuccess?: () => void }) {
     submitData.append("firstName", formData.firstName);
     submitData.append("email", formData.email);
     submitData.append("contactNumber", formData.contactNumber);
+    if (record?.photoUrl) {
+      submitData.append("existingPhotoUrl", record.photoUrl);
+    }
     if (formData.photo) {
       submitData.append("photo", formData.photo);
     }
 
     try {
-      const res = await fetch("/api/record", {
-        method: "POST",
+      const url = record ? `/api/record/${record._id}` : "/api/record";
+      const method = record ? "PUT" : "POST";
+      const res = await fetch(url, {
+        method,
         body: submitData,
       });
 
       const data = await res.json();
       if (data.success) {
-        setFormData({
-          country: "",
-          accountType: "",
-          username: "",
-          lastName: "",
-          firstName: "",
-          email: "",
-          contactNumber: "",
-          photo: null,
-        });
-        setPreviewUrl(null);
+        if (!record) {
+          setFormData({
+            country: "",
+            accountType: "",
+            username: "",
+            lastName: "",
+            firstName: "",
+            email: "",
+            contactNumber: "",
+            photo: null,
+          });
+          setPreviewUrl(null);
+        }
         if (onSuccess) onSuccess();
-        toast.success("Record submitted successfully!");
+        toast.success(
+          record
+            ? "Record updated successfully!"
+            : "Record submitted successfully!"
+        );
       } else {
         toast.error("Submission failed: " + (data.error || "Unknown error"));
       }
