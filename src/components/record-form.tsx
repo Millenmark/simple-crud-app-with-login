@@ -1,6 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  SelectLabel,
+  SelectGroup,
+} from "@/components/ui/select";
+
+import { getData } from "country-list";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "./ui/button";
 
 export default function RecordForm() {
   const [country, setCountry] = useState("");
@@ -41,7 +55,7 @@ export default function RecordForm() {
         if (data.photoUrl) {
           setUploadedUrl(data.photoUrl);
         }
-        alert("Record submitted successfully!");
+
         // Reset form
         setCountry("");
         setAccountType("");
@@ -58,12 +72,12 @@ export default function RecordForm() {
       alert("Error submitting form");
     } finally {
       setIsSubmitting(false);
+      alert("Record submitted successfully!");
     }
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-6 text-center">Record Form</h2>
+    <div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label
@@ -72,14 +86,21 @@ export default function RecordForm() {
           >
             Country
           </label>
-          <input
-            type="text"
-            id="country"
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            required
-          />
+          <Select value={country} onValueChange={setCountry}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select a country" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Countries</SelectLabel>
+                {getData().map((country) => (
+                  <SelectItem key={country.code} value={country.name}>
+                    {country.name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </div>
         <div>
           <label
@@ -88,117 +109,86 @@ export default function RecordForm() {
           >
             Account Type
           </label>
-          <input
-            type="text"
-            id="accountType"
-            value={accountType}
-            onChange={(e) => setAccountType(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            required
-          />
+          <Select value={accountType} onValueChange={setAccountType}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select a account type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Account Type</SelectLabel>
+                <SelectItem value="Team Member">Team Member</SelectItem>
+                <SelectItem value="Team Leader">Team Leader</SelectItem>
+                <SelectItem value="project manager">Project Manager</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </div>
-        <div>
-          <label
-            htmlFor="username"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Username
-          </label>
-          <input
+        <div className="grid w-full items-center gap-3">
+          <Label htmlFor="username">Username</Label>
+          <Input
             type="text"
             id="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             required
           />
         </div>
-        <div>
-          <label
-            htmlFor="lastName"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Last Name
-          </label>
-          <input
-            type="text"
-            id="lastName"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            required
-          />
-        </div>
-        <div>
-          <label
-            htmlFor="firstName"
-            className="block text-sm font-medium text-gray-700"
-          >
-            First Name
-          </label>
-          <input
+        <div className="grid w-full items-center gap-3">
+          <Label htmlFor="firstName">First Name</Label>
+          <Input
             type="text"
             id="firstName"
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             required
           />
         </div>
-        <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Email Address
-          </label>
-          <input
+        <div className="grid w-full items-center gap-3">
+          <Label htmlFor="lastName">Last Name</Label>
+          <Input
+            type="text"
+            id="lastName"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            required
+          />
+        </div>
+        <div className="grid w-full items-center gap-3">
+          <Label htmlFor="email">Email Address</Label>
+          <Input
             type="email"
             id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             required
           />
         </div>
-        <div>
-          <label
-            htmlFor="contactNumber"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Contact Number
-          </label>
-          <input
+        <div className="grid w-full items-center gap-3">
+          <Label htmlFor="contactNumber">Contact Number</Label>
+          <Input
+            required
             type="tel"
             id="contactNumber"
             value={contactNumber}
             onChange={(e) => setContactNumber(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            required
           />
         </div>
-        <div>
-          <label
-            htmlFor="photo"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Photo (optional)
-          </label>
-          <input
-            type="file"
+        <div className="grid w-full items-center gap-3">
+          <Label htmlFor="photo">Photo (optional)</Label>
+          <Input
             id="photo"
+            type="file"
             accept="image/*"
             onChange={(e) => setPhoto(e.target.files?.[0] || null)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
           />
         </div>
-        <button
+        <Button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 disabled:opacity-50"
+          className="cursor-pointer w-full"
         >
           {isSubmitting ? "Submitting..." : "Submit"}
-        </button>
+        </Button>
       </form>
 
       {uploadedUrl && (

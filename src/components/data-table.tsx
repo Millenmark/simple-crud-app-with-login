@@ -47,7 +47,10 @@ import RecordForm from "@/components/record-form";
 export type Record = {
   id: string;
   photo: string;
-  name: number;
+  country: string;
+  contactNumber: number;
+  firstName: string;
+  lastName: string;
   username: string;
   email: string;
   accountType: string;
@@ -55,15 +58,20 @@ export type Record = {
 
 export const columns: ColumnDef<Record>[] = [
   {
-    accessorKey: "photo",
+    accessorKey: "photoUrl",
     header: "Photo",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("status")}</div>
+    cell: ({ getValue }) => (
+      <img src={getValue() as string} className=" size-20" />
     ),
   },
   {
-    accessorKey: "name",
+    accessorKey: "firstName",
     header: "Name",
+    cell: ({ row, getValue }) => {
+      const firstName = getValue<string>();
+      const lastName = row.original.lastName;
+      return firstName + " " + lastName;
+    },
   },
   {
     accessorKey: "username",

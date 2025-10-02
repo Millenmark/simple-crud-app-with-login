@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       photoUrl = `/uploads/${fileName}`;
     }
 
-    const newRecord = new Record({
+    await Record.create({
       country,
       accountType,
       username,
@@ -60,8 +60,6 @@ export async function POST(request: NextRequest) {
       contactNumber,
       photoUrl,
     });
-
-    await newRecord.save();
 
     return NextResponse.json({ success: true, ...(photoUrl && { photoUrl }) });
   } catch (error) {
