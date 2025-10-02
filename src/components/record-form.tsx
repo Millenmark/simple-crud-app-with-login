@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useActionState } from "react";
 import {
   Select,
   SelectContent,
@@ -17,18 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Record as RecordType } from "./data-table";
-import { z } from "zod";
-
-const formSchema = z.object({
-  country: z.string().min(1, "Country is required"),
-  accountType: z.string().min(1, "Account type is required"),
-  username: z.string().min(1, "Username is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  firstName: z.string().min(1, "First name is required"),
-  email: z.string().email("Invalid email address"),
-  contactNumber: z.string().min(1, "Contact number is required"),
-  photo: z.instanceof(File).optional().nullable(),
-});
+import { createOrUpdateRecord } from "@/lib/record-actions";
 
 interface FormData {
   country: string;
@@ -61,7 +50,10 @@ export default function RecordForm({
   const [previewUrl, setPreviewUrl] = useState<string | null>(
     record?.photoUrl || null
   );
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [state, action, isPending] = useActionState(
+    createOrUpdateRecord,
+    undefined
+  );
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -72,81 +64,46 @@ export default function RecordForm({
     };
   }, [previewUrl]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const validation = formSchema.safeParse(formData);
-    if (!validation.success) {
-      const fieldErrors: Record<string, string> = {};
-      validation.error.issues.forEach((issue) => {
-        if (issue.path.length > 0) {
-          fieldErrors[issue.path[0] as string] = issue.message;
-        }
-      });
-      setErrors(fieldErrors);
-      return;
-    }
-
-    setErrors({});
-    setIsSubmitting(true);
-
-    const submitData = new FormData();
-    submitData.append("country", formData.country);
-    submitData.append("accountType", formData.accountType);
-    submitData.append("username", formData.username);
-    submitData.append("lastName", formData.lastName);
-    submitData.append("firstName", formData.firstName);
-    submitData.append("email", formData.email);
-    submitData.append("contactNumber", formData.contactNumber);
-    if (record?.photoUrl) {
-      submitData.append("existingPhotoUrl", record.photoUrl);
-    }
-    if (formData.photo) {
-      submitData.append("photo", formData.photo);
-    }
-
-    try {
-      const url = record ? `/api/record/${record._id}` : "/api/record";
-      const method = record ? "PUT" : "POST";
-      const res = await fetch(url, {
-        method,
-        body: submitData,
-      });
-
-      const data = await res.json();
-      if (data.success) {
-        if (!record) {
-          setFormData({
-            country: "",
-            accountType: "",
-            username: "",
-            lastName: "",
-            firstName: "",
-            email: "",
-            contactNumber: "",
-            photo: null,
-          });
-          setPreviewUrl(null);
-        }
-        if (onSuccess) onSuccess();
-        toast.success(
-          record
-            ? "Record updated successfully!"
-            : "Record submitted successfully!"
-        );
-      } else {
-        toast.error("Submission failed: " + (data.error || "Unknown error"));
+  useEffect(() => {
+    if (state?.success) {
+      if (!record) {
+        setFormData({
+          country: "",
+          accountType: "",
+          username: "",
+          lastName: "",
+          firstName: "",
+          email: "",
+          contactNumber: "",
+          photo: null,
+        });
+        setPreviewUrl(null);
       }
-    } catch (error) {
-      toast.error("Error submitting form");
-    } finally {
-      setIsSubmitting(false);
+      if (onSuccess) onSuccess();
+      toast.success(state.message);
+    } else if (state?.errors) {
+      setErrors(
+        Object.fromEntries(
+          Object.entries(state.errors).map(([k, v]) => [
+            k,
+            Array.isArray(v) ? v[0] : v,
+          ])
+        )
+      );
     }
-  };
+  }, [state]);
 
   return (
     <div>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form action={action} className="space-y-4">
+        {record && <input type="hidden" name="id" value={record._id} />}
+        {record?.photoUrl && (
+          <input
+            type="hidden"
+            name="existingPhotoUrl"
+            value={record.photoUrl}
+          />
+        )}
         <div>
           <label
             htmlFor="country"
@@ -155,6 +112,7 @@ export default function RecordForm({
             Country
           </label>
           <Select
+            name="country"
             value={formData.country}
             onValueChange={(value) =>
               setFormData((prev) => ({ ...prev, country: value }))
@@ -186,6 +144,7 @@ export default function RecordForm({
             Account Type
           </label>
           <Select
+            name="accountType"
             value={formData.accountType}
             onValueChange={(value) =>
               setFormData((prev) => ({ ...prev, accountType: value }))
@@ -210,6 +169,7 @@ export default function RecordForm({
         <div className="grid w-full items-center gap-3">
           <Label htmlFor="username">Username</Label>
           <Input
+            name="username"
             type="text"
             id="username"
             value={formData.username}
@@ -224,6 +184,7 @@ export default function RecordForm({
         <div className="grid w-full items-center gap-3">
           <Label htmlFor="firstName">First Name</Label>
           <Input
+            name="firstName"
             type="text"
             id="firstName"
             value={formData.firstName}
@@ -238,6 +199,7 @@ export default function RecordForm({
         <div className="grid w-full items-center gap-3">
           <Label htmlFor="lastName">Last Name</Label>
           <Input
+            name="lastName"
             type="text"
             id="lastName"
             value={formData.lastName}
@@ -252,6 +214,7 @@ export default function RecordForm({
         <div className="grid w-full items-center gap-3">
           <Label htmlFor="email">Email Address</Label>
           <Input
+            name="email"
             type="email"
             id="email"
             value={formData.email}
@@ -266,6 +229,7 @@ export default function RecordForm({
         <div className="grid w-full items-center gap-3">
           <Label htmlFor="contactNumber">Contact Number</Label>
           <Input
+            name="contactNumber"
             type="tel"
             id="contactNumber"
             value={formData.contactNumber}
@@ -283,6 +247,7 @@ export default function RecordForm({
         <div className="grid w-full items-center gap-3">
           <Label htmlFor="photo">Photo (optional)</Label>
           <Input
+            name="photo"
             id="photo"
             type="file"
             accept="image/*"
@@ -299,10 +264,10 @@ export default function RecordForm({
         </div>
         <Button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isPending}
           className="cursor-pointer w-full"
         >
-          {isSubmitting ? "Submitting..." : "Submit"}
+          {isPending ? "Submitting..." : "Submit"}
         </Button>
       </form>
 
