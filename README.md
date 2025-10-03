@@ -25,16 +25,16 @@ Before running this application, ensure you have the following installed:
 
 ## Setup
 
-1. Copy the environment file:
+1. Environment variables are already provided in .env.local. You can either copy them into a new .env
 
    ```bash
-   cp .env.local.example .env.local
+   cp .env.local .env
    ```
 
-   Or create `.env.local` with the following variables:
+   Or create `.env` with the following variables:
 
    ```
-   SESSION_SECRET=some-secure-key
+   SESSION_SECRET=123
    MONGODB_URI=mongodb://localhost:27017/simple-crud-app
    ```
 
@@ -66,5 +66,5 @@ The application will automatically reload as you make changes to the code.
 
 ## Notes
 
-- **Authentication**: For simplicity, login credentials are static and there is no user table in the database for verification. In a production environment, implement proper user management with database-backed authentication. The app uses JWT tokens (via the jose library) for session management, stored securely in httpOnly cookies.
+- **Authentication**: For simplicity, login credentials are static and there is no user table in the database for verification. In a production environment, implement proper user management with database-backed authentication. The app uses JWT tokens (via the jose library) for session management, stored securely in httpOnly cookies as mentioned in the features section.
 - **File Storage**: Images are saved in the public folder for simplicity. In a real-world application, use a CDN service like Cloudinary for better performance and scalability.
